@@ -4,6 +4,11 @@ return {
 		"folke/tokyonight.nvim",
 		lazy = false,
 		priority = 900,
+		--       config = function()
+		-- 	-- load the colorscheme here
+		-- 	vim.cmd([[colorscheme tokyonight-moon]])
+		-- end
+
 	},
 	-- Aylin Selene look: ayu-vim mirage variant (dark bg #212733, bright accents)
 	{
@@ -19,15 +24,46 @@ return {
 			-- aylin_selene.apply()
 		end,
 	},
-    {
-        "catppuccin/nvim",
+    -- {
+    --     "catppuccin/nvim",
+	-- 	lazy = false,
+    --     name = "catppuccin",
+    --     priority = 1000,
+    --     config = function()
+    --         vim.cmd([[colorscheme catppuccin-mocha]])
+    --     end
+    -- },
+	-- Nord theme (active)
+	{
+		"shaunsingh/nord.nvim",
 		lazy = false,
-        name = "catppuccin",
-        priority = 1000,
-        config = function()
-            vim.cmd([[colorscheme catppuccin-mocha]])
-        end
-    },
+		priority = 1000,
+		config = function()
+			vim.g.nord_contrast = true
+			vim.g.nord_borders = false
+			vim.g.nord_disable_background = false
+			vim.g.nord_italic = false
+			vim.g.nord_uniform_diff_background = true
+			vim.g.nord_bold = false
+			vim.cmd.colorscheme('nord')
+		end,
+	},
+	-- Statusline
+	{
+		'nvim-lualine/lualine.nvim',
+		dependencies = { 'nvim-tree/nvim-web-devicons' },
+		config = function()
+			vim.opt.showmode = false
+			require('lualine').setup({
+				options = {
+					theme = 'nord',
+				},
+				sections = {
+					lualine_x = { 'encoding', 'filetype' },
+				},
+			})
+		end,
+	},
 	{
 		'nvim-telescope/telescope.nvim', version = '*',
 		dependencies = {
@@ -64,6 +100,7 @@ return {
 			require('lsp.json')
 			require('lsp.emmet')
 			require('lsp.python')
+			require('lsp.codebook')
 		end,
 	},
 	-- C# LSP (roslyn)
@@ -166,15 +203,26 @@ return {
 					env_vars['ASPNETCORE_URLS'] = app_url
 				end
 
-				-- Auto-detect dll path from .csproj name + bin/Debug/net* folder
+				-- Auto-detect dll path from .csproj name + bin/Debug/net* folder.
+				-- Prefer the folder matching the csproj's TargetFramework (e.g.
+				-- net7.0) over the first alphabetical glob match, so stale
+				-- net* folders from other branches never win.
 				local csproj   = vim.fn.glob(cwd .. '/*.csproj')
 				local dll_name = csproj ~= ''
 					and vim.fn.fnamemodify(csproj, ':t:r')
 					or  vim.fn.fnamemodify(cwd, ':t')
 				local tf_dirs  = vim.fn.glob(cwd .. '/bin/Debug/net*', false, true)
-				local dll_path = #tf_dirs > 0
-					and (tf_dirs[1] .. '/' .. dll_name .. '.dll')
-					or  (cwd .. '/bin/Debug/')
+				local tfm      = csproj ~= ''
+					and vim.fn.matchstr(table.concat(vim.fn.readfile(csproj), '\n'), '<TargetFramework>\\zs[^<]*\\ze</TargetFramework>')
+					or  ''
+				local dll_path = cwd .. '/bin/Debug/'
+				if #tf_dirs > 0 then
+					local target_dir = vim.tbl_filter(function(dir)
+						return tfm ~= '' and vim.fn.fnamemodify(dir, ':t') == tfm
+					end, tf_dirs)
+					local chosen = #target_dir > 0 and target_dir[1] or tf_dirs[1]
+					dll_path = chosen .. '/' .. dll_name .. '.dll'
+				end
 
 				return {
 					type    = 'coreclr',
@@ -198,6 +246,10 @@ return {
 			vim.keymap.set('n', '<F10>', dap.step_over,                    opts)
 			vim.keymap.set('n', '<F11>', dap.step_into,                    opts)
 			vim.keymap.set('n', '<F8>',  dap.step_out,                     opts)
+            vim.keymap.set('n', '<leader>db', dap.toggle_breakpoint, opts)
+			vim.keymap.set('n', '<leader>dB', function()
+				dap.set_breakpoint(vim.fn.input('Breakpoint condition: '))
+			end, opts)
 			vim.keymap.set('n', '<leader>dr', dap.repl.open,               opts)
 			vim.keymap.set('n', '<leader>dl', dap.run_last,                 opts)
 			vim.keymap.set('n', '<leader>dq', dap.terminate,               opts)
@@ -231,9 +283,14 @@ return {
 	{
 		'L3MON4D3/LuaSnip',
 		version = 'v2.*',
-		dependencies = { 'rafamadriz/friendly-snippets' },
+		dependencies = { 'rafamadriz/friendly-snippets', 'mlaursen/vim-react-snippets' },
 		config = function()
+			local ls = require('luasnip')
+			ls.filetype_extend('typescript', { 'angular' })
+			ls.filetype_extend('html', { 'angular' })
+			ls.filetype_extend('jsonc', { 'angular' })
 			require('luasnip.loaders.from_vscode').lazy_load()
+			require('vim-react-snippets').setup()
 		end,
 	},
 	-- Autocompletion
