@@ -1,53 +1,64 @@
 return {
-	-- Tokyo Night stays installed as an alternate theme (`:colorscheme tokyonight`)
+	-- Tokyo Night (active)
 	{
 		"folke/tokyonight.nvim",
 		lazy = false,
-		priority = 900,
-		--       config = function()
-		-- 	-- load the colorscheme here
-		-- 	vim.cmd([[colorscheme tokyonight-moon]])
-		-- end
+		priority = 1000,
+		config = function()
+			-- load the colorscheme here
+			vim.cmd([[colorscheme tokyonight-moon]])
+		end
 
 	},
 	-- Aylin Selene look: ayu-vim mirage variant (dark bg #212733, bright accents)
-	{
-		"ayu-theme/ayu-vim",
-		lazy = false,
-		priority = 100,
-		config = function()
-			-- Load the Aylin Selene override module first (registers ColorScheme autocmd)
-			local aylin_selene = require('config.aylin_selene')
-			vim.g.ayucolor = "mirage" -- use the mirage variant (closest to Aylin Selene)
-			-- vim.cmd([[colorscheme ayu]])
-			-- Apply the Aylin Selene palette overrides on top of ayu
-			-- aylin_selene.apply()
-		end,
-	},
+	-- {
+	-- 	"ayu-theme/ayu-vim",
+	-- 	lazy = false,
+	-- 	priority = 1000,
+	-- 	config = function()
+	-- 		-- Load the Aylin Selene override module first (registers ColorScheme autocmd)
+	-- 		local aylin_selene = require('config.aylin_selene')
+	-- 		vim.g.ayucolor = "mirage" -- use the mirage variant (closest to Aylin Selene)
+	-- 		vim.cmd([[colorscheme ayu]])
+	-- 		-- Apply the Aylin Selene palette overrides on top of ayu
+	-- 		aylin_selene.apply()
+	-- 	end,
+	-- },
+    -- Poimandres (alternate)
+    -- {
+    --     "olivercederborg/poimandres.nvim",
+    --     lazy = false,
+    --     priority = 1000,
+    --     config = function()
+    --         require('poimandres').setup {}
+    --         vim.cmd([[colorscheme poimandres]])
+    --     end
+    -- },
+    -- Catppuccin (alternate)
     -- {
     --     "catppuccin/nvim",
-	-- 	lazy = false,
+    --     lazy = false,
     --     name = "catppuccin",
     --     priority = 1000,
     --     config = function()
     --         vim.cmd([[colorscheme catppuccin-mocha]])
     --     end
     -- },
-	-- Nord theme (active)
-	{
-		"shaunsingh/nord.nvim",
-		lazy = false,
-		priority = 1000,
-		config = function()
-			vim.g.nord_contrast = true
-			vim.g.nord_borders = false
-			vim.g.nord_disable_background = false
-			vim.g.nord_italic = false
-			vim.g.nord_uniform_diff_background = true
-			vim.g.nord_bold = false
-			vim.cmd.colorscheme('nord')
-		end,
-	},
+	-- Nord theme (alternate)
+	-- {
+	-- 	"shaunsingh/nord.nvim",
+	-- 	lazy = false,
+	-- 	priority = 1000,
+	-- 	config = function()
+	-- 		vim.g.nord_contrast = true
+	-- 		vim.g.nord_borders = false
+	-- 		vim.g.nord_disable_background = false
+	-- 		vim.g.nord_italic = false
+	-- 		vim.g.nord_uniform_diff_background = true
+	-- 		vim.g.nord_bold = false
+	-- 		vim.cmd.colorscheme('nord')
+	-- 	end,
+	-- },
 	-- Statusline
 	{
 		'nvim-lualine/lualine.nvim',
@@ -56,7 +67,7 @@ return {
 			vim.opt.showmode = false
 			require('lualine').setup({
 				options = {
-					theme = 'nord',
+					theme = 'auto',
 				},
 				sections = {
 					lualine_x = { 'encoding', 'filetype' },
